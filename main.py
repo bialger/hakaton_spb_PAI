@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 
 df_list = []
-df = pd.read_csv(r'C:\Users\gigih\Downloads\train_dataset_Датасет.csv', names=['sentence', 'label'], sep='\t')
+df = pd.read_csv(r'train_dataset.csv', names=['sentence', 'label'], sep='\t')
 df['source'] = 'mfc'  # Add another column filled with the source name
 df_list.append(df)
 
