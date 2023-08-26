@@ -51,7 +51,7 @@ columns_list = ['Keywords', 'Answer']
 keywords_answer = pd.DataFrame(columns=columns_list)
 for str in b2.iterrows():
     doc = nlp(" ".join([str[1]["Теги по услуге"], str[1]["Сокращенное наименование услуги"], str[1]["Вопрос"]]))
-    loc = pd.DataFrame([[" ".join([i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))]), str[1]["Ответ"]]],columns=columns_list)
+    loc = pd.DataFrame([[" ".join([i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))]), str[1]["Ответ"]]],columns=columns_list, dtype="object")
     keywords_answer = pd.concat([keywords_answer, loc], ignore_index=True)
 
 keywords_answer.to_csv("keywords_answer.csv", sep=";", index=False)
@@ -74,7 +74,7 @@ columns_list = ['Keywords', 'Answer']
 res_key_ans = pd.DataFrame(columns=columns_list)
 for str in b1.iterrows():
     doc = nlp(str[1]["QUESTION"])
-    loc = pd.DataFrame([[" ".join([i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))]), str[1]["ANSWER"]]],columns=columns_list)
+    loc = pd.DataFrame([[" ".join([i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))]), str[1]["ANSWER"]]],columns=columns_list, dtype="object")
     res_key_ans = pd.concat([res_key_ans, loc], ignore_index=True)
 
 res_key_ans.to_csv("res_key_ans.csv", sep=";", index=False)
