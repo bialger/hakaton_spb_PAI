@@ -1,4 +1,4 @@
-import tensorflow as tf
+'''import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -7,6 +7,7 @@ from keras import layers
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+import os
 
 df_list = []
 df = pd.read_csv(r'train_dataset.csv', names=['sentence', 'label'], sep='\t')
@@ -73,4 +74,22 @@ model.compile(loss='binary_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 model.summary()
+'''
 
+
+import pymorphy2
+import pandas as pd
+import re
+
+def normalize_sentence(sentence):
+    # Разбиваем предложение на слова
+    words = re.findall(r'\w+', sentence)
+    # Нормализуем каждое слово
+    normalized_words = [pymorphy2.MorphAnalyzer().normalize(word) for word in words]
+    # Возвращаем нормализованное предложение
+    return ' '.join(normalized_words)
+
+# Читаем CSV-файл
+df = pd.read_csv(r'C:\Users\gigih\Downloads\database.csv', delimiter=';')
+# Создаем новое поле "normalized_text" с нормализованными предложениями
+df["normalized_text"] = df["text"].apply(lambda x: normalize_sentence(x))
