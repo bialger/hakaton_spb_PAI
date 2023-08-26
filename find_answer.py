@@ -1,27 +1,27 @@
 import pandas as pd
 
 
-def letters(input):
-    return ''.join([c for c in input if c.isalpha()])
-
-
 def func1(a):
-    keywords_answer = pd.read_csv('keywords_answer.csv', delimiter=';')
-    maxi = 0
-    max_counter = 0
+    keywords_answer = pd.read_csv('full_dataset.csv', delimiter=';')
     counter = 0
+    biggest_len_of_keys = []
     for x in keywords_answer["Keywords"]:
+        try:
+            x1 = x.split()
+        except Exception:
+            pass
         len1 = 0
-        x0 = x.split()
-        x1 = []
-        for i in x0:
-            x1.append(letters(i))
         for t in x1:
             if t in a:
                 len1 += 1
-        if len1 > maxi:
-            maxi = len1
-            max_counter = counter
+        biggest_len_of_keys.append([len1, keywords_answer['Answer'][counter]])
         counter += 1
-    return keywords_answer["Answer"][max_counter]
-
+    biggest_len_of_keys.sort(reverse = True)
+    answers = []
+    if len(a) >= 5:
+        answers = [answ[1] for answ in biggest_len_of_keys[0:2]]
+    elif 5 > len(a) > 1:
+        answers = [answ[1] for answ in biggest_len_of_keys[0:7-len(a)]]
+    else:
+        answers = ['Пожалуйста, уточните ваш запрос.']
+    return answers
