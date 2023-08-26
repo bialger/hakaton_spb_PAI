@@ -28,6 +28,11 @@ intersections.to_csv("full-question-answer-base.csv", sep=';', index=False)
 
 import yake
 
+import spacy
+nlp = spacy.load("ru_core_news_sm")
+import ru_core_news_sm
+nlp = ru_core_news_sm.load()
+
 language = "ru"
 max_ngram_size = 1
 deduplication_thresold = 0.9
@@ -44,8 +49,9 @@ kw_extractor = yake.KeywordExtractor(lan=language,
 
 columns_list = ['Keywords', 'Answer']
 keywords_answer = pd.DataFrame(columns=columns_list)
-for str1 in b2.iterrows():
-    loc = pd.DataFrame([[[i[0] for i in kw_extractor.extract_keywords(" ".join([str1[1]["Теги по услуге"], str1[1]["Сокращенное наименование услуги"], str1[1]["Вопрос"]]))], str1[1]["Ответ"]]],columns=columns_list)
+for str in b2.iterrows():
+    doc = nlp(" ".join([str[1]["Теги по услуге"], str[1]["Сокращенное наименование услуги"], str[1]["Вопрос"]]))
+    loc = pd.DataFrame([[[i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))], str[1]["Ответ"]]],columns=columns_list)
     keywords_answer = pd.concat([keywords_answer, loc], ignore_index=True)
 
 keywords_answer.to_csv("keywords_answer.csv", sep=";", index=False)
@@ -66,8 +72,9 @@ kw_extractor = yake.KeywordExtractor(lan=language,
 
 columns_list = ['Keywords', 'Answer']
 res_key_ans = pd.DataFrame(columns=columns_list)
-for str1 in b1.iterrows():
-    loc = pd.DataFrame([[[i[0] for i in kw_extractor.extract_keywords(str1[1]["QUESTION"])], str1[1]["ANSWER"]]],columns=columns_list)
+for str in b1.iterrows():
+    doc = nlp(str[1]["QUESTION"])
+    loc = pd.DataFrame([[[i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))], str[1]["ANSWER"]]],columns=columns_list)
     res_key_ans = pd.concat([res_key_ans, loc], ignore_index=True)
 
 res_key_ans.to_csv("res_key_ans.csv", sep=";", index=False)
