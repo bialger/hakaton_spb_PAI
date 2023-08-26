@@ -78,3 +78,6 @@ for str in b1.iterrows():
     res_key_ans = pd.concat([res_key_ans, loc], ignore_index=True)
 
 res_key_ans.to_csv("res_key_ans.csv", sep=";", index=False)
+
+full_dataset = pd.concat([keywords_answer, res_key_ans], ignore_index=True)
+full_dataset.to_csv("full_dataset.csv", sep=";", index=False)
