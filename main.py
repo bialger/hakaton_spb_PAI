@@ -1,5 +1,6 @@
 import yake
 import spacy
+import find_answer
 
 
 user_prompt = input()
@@ -24,4 +25,4 @@ doc = nlp(user_prompt)
 raw_keywords = extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ignore_list]))
 extracted_keywords_list = [i[0] for i in raw_keywords]
 
-print(extracted_keywords_list)
+print(find_answer.func1(extracted_keywords_list))
