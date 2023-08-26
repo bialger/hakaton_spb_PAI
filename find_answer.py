@@ -19,9 +19,17 @@ def func1(a):
     biggest_len_of_keys.sort(reverse = True)
     answers = []
     if len(a) >= 5:
-        answers = [answ[1] for answ in biggest_len_of_keys[0:2]]
+        c = 0
+        while len(answers) < 2:
+            if biggest_len_of_keys[c][1] not in answers:
+                answers.append(biggest_len_of_keys[c][1])
+            c += 1
     elif 5 > len(a) > 1:
-        answers = [answ[1] for answ in biggest_len_of_keys[0:7-len(a)]]
+        c = 0
+        while len(answers) < 7-len(a):
+            if biggest_len_of_keys[c][1] not in answers:
+                answers.append(biggest_len_of_keys[c][1])
+            c += 1
     else:
-        answers = ['Пожалуйста, уточните ваш запрос.']
+        answers = ['Пожалуйста, уточните Ваш запрос.']
     return answers
