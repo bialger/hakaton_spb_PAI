@@ -30,4 +30,4 @@ Python console app that solves MFC problem using AI. Packed with Docker.
 
 ## Authors - PAI
 
-**Maxim**
+**Maxim Ryzhevnin, Alexander Bigulov, Egor Smirnov, Vyacheslav Atamanyuk, Vladimir Chumakov**
