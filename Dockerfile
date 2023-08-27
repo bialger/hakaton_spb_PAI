@@ -9,15 +9,15 @@ RUN apt-get update \
     && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 ADD requirements.txt /application/
-ADD src/main.py /application/
-ADD src/database_editor.py /application/
-ADD src/find_answer.py /application/
-ADD src/database.csv /application/
-ADD src/full-question-answer-base.csv /application/
-ADD src/full_dataset.csv /application/
-ADD src/keywords_answer.csv /application/
-ADD src/res_key_ans.csv /application/
-ADD src/train_dataset.csv /application/
+ADD main.py /application/
+ADD database_editor.py /application/
+ADD find_answer.py /application/
+ADD database.csv /application/
+ADD full-question-answer-base.csv /application/
+ADD full_dataset.csv /application/
+ADD keywords_answer.csv /application/
+ADD res_key_ans.csv /application/
+ADD train_dataset.csv /application/
 
 RUN pip install -r /application/requirements.txt
 RUN python -m spacy download ru_core_news_sm
