@@ -2,7 +2,6 @@ import yake
 import spacy
 import find_answer
 
-
 # This is a main script of the project. Normally only this script should be launched by the user.
 # This script processes prompt using NLP libraries, especially YAKE! and spaCy extracting five or fewer keywords.
 # Then using find_answer.py it shows some variants of answers.
