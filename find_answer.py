@@ -1,27 +1,36 @@
 import pandas as pd
 
+# This script consists of one function that is used in main.py.
+# It receives keywords from user prompt, compares it with all keyword sets and returns matching answers.
 
-def letters(input):
-    return ''.join([c for c in input if c.isalpha()])
 
-
-def func1(a):
-    keywords_answer = pd.read_csv('keywords_answer.csv', delimiter=';')
-    maxi = 0
-    max_counter = 0
+def find_answers(user_keywords):
+    dataset_keywords_answer = pd.read_csv('full_dataset.csv', delimiter=';')
     counter = 0
-    for x in keywords_answer["Keywords"]:
-        len1 = 0
-        x0 = x.split()
-        x1 = []
-        for i in x0:
-            x1.append(letters(i))
-        for t in x1:
-            if t in a:
-                len1 += 1
-        if len1 > maxi:
-            maxi = len1
-            max_counter = counter
+    all_matches_keywords = []
+    for raw_keywords in dataset_keywords_answer["Keywords"]:
+        list_keywords = []
+        try:
+            list_keywords = raw_keywords.split()
+        except AttributeError:
+            pass
+        match_count = 0
+        for current_keyword in list_keywords:
+            if current_keyword in user_keywords:
+                match_count += 1
+        all_matches_keywords.append([match_count, dataset_keywords_answer['Answer'][counter]])
         counter += 1
-    return keywords_answer["Answer"][max_counter]
-
+    all_matches_keywords.sort(reverse=True)
+    answers = []
+    if len(user_keywords) > 1:
+        target_answers_len = 3
+        if len(user_keywords) < 5:
+            target_answers_len += 5 - len(user_keywords)
+        c = 0
+        while len(answers) < target_answers_len:
+            if all_matches_keywords[c][1] not in answers:
+                answers.append(all_matches_keywords[c][1])
+            c += 1
+    else:
+        answers = ['Пожалуйста, уточните Ваш запрос.']
+    return answers
