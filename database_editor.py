@@ -1,37 +1,38 @@
 import pandas as pd
+import yake
+import spacy
 
-b1 = pd.read_csv('train_dataset.csv', delimiter=';')
-b1 = b1.dropna()
-b2 = pd.read_csv('database.csv', delimiter=';')
-b2 = b2.dropna()
+
+# This file configures databases and processes significant amount of information using NLP and keyword extractor library
+# This script merges two given datasets into one, then handle them, extracting keywords from questions and other data.
+# Normally it should be edited and launched only if you want to reconfigure dataset, e.g. increase amount of keywords.
+
+first_database = pd.read_csv('train_dataset.csv', delimiter=';')
+first_database = first_database.dropna()
+second_database = pd.read_csv('database.csv', delimiter=';')
+second_database = second_database.dropna()
 
 columns_list = ["QUESTION", "ANSWER"]
 intersections = pd.DataFrame(columns=columns_list)
 
-for str1 in b1.iterrows():
-    question = str1[1]["QUESTION"]
-    answer = str1[1]["ANSWER"]
-    mask = (b2["Ответ"] == answer)
+for line in first_database.iterrows():
+    question = line[1]["QUESTION"]
+    answer = line[1]["ANSWER"]
+    mask = (second_database["Ответ"] == answer)
     try:
-        full_name = b2["Полное наименование услуги"][mask][0]
-        short_name = b2["Сокращенное наименование услуги"][mask][0]
-        tags = b2["Теги по услуге"][mask][0]
-    except Exception:
+        full_name = second_database["Полное наименование услуги"][mask][0]
+        short_name = second_database["Сокращенное наименование услуги"][mask][0]
+        tag = second_database["Теги по услуге"][mask][0]
+    except KeyError:
         full_name = ""
         short_name = ""
-        tags = ""
-    
-    loc_df = pd.DataFrame([[" ".join([question, full_name, short_name, tags]), answer]], columns=columns_list)
-    intersections = pd.concat([intersections, loc_df], ignore_index=True)
+        tag = ""
+    new_question = " ".join([question, full_name, short_name, tag])
+    summarized_dataframe = pd.DataFrame([[new_question, answer]], columns=columns_list)
+    intersections = pd.concat([intersections, summarized_dataframe], ignore_index=True)
 
 intersections.to_csv("full-question-answer-base.csv", sep=';', index=False)
 
-import yake
-
-import spacy
-nlp = spacy.load("ru_core_news_sm")
-import ru_core_news_sm
-nlp = ru_core_news_sm.load()
 
 language = "ru"
 max_ngram_size = 1
@@ -39,45 +40,64 @@ deduplication_thresold = 0.9
 deduplication_algo = 'seqm'
 windowSize = 1
 numOfKeywords = 5
+ignore_list = ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]
+nlp = spacy.load("ru_core_news_sm")
 
-kw_extractor = yake.KeywordExtractor(lan=language, 
-                                     n=max_ngram_size, 
-                                     dedupLim=deduplication_thresold, 
-                                     dedupFunc=deduplication_algo, 
-                                     windowsSize=windowSize, 
-                                     top=numOfKeywords)
+extractor = yake.KeywordExtractor(lan=language,
+                                  n=max_ngram_size,
+                                  dedupLim=deduplication_thresold,
+                                  dedupFunc=deduplication_algo,
+                                  windowsSize=windowSize,
+                                  top=numOfKeywords)
 
-columns_list = ['Keywords', 'Answer']
-keywords_answer = pd.DataFrame(columns=columns_list)
-for str in b2.iterrows():
-    doc = nlp(" ".join([str[1]["Теги по услуге"], str[1]["Сокращенное наименование услуги"], str[1]["Вопрос"]]))
-    loc = pd.DataFrame([[" ".join([i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))]), str[1]["Ответ"]]],columns=columns_list, dtype="object")
-    keywords_answer = pd.concat([keywords_answer, loc], ignore_index=True)
-
-keywords_answer.to_csv("keywords_answer.csv", sep=";", index=False)
-
-language = "ru"
-max_ngram_size = 1
-deduplication_thresold = 0.9
-deduplication_algo = 'seqm'
-windowSize = 1
-numOfKeywords = 3
-
-kw_extractor = yake.KeywordExtractor(lan=language, 
-                                     n=max_ngram_size, 
-                                     dedupLim=deduplication_thresold, 
-                                     dedupFunc=deduplication_algo, 
-                                     windowsSize=windowSize, 
-                                     top=numOfKeywords)
 
 columns_list = ['Keywords', 'Answer']
-res_key_ans = pd.DataFrame(columns=columns_list)
-for str in b1.iterrows():
-    doc = nlp(str[1]["QUESTION"])
-    loc = pd.DataFrame([[" ".join([i[0] for i in kw_extractor.extract_keywords(" ".join([token.lemma_ for token in doc if token.pos_ not in ["PUNCT", "ADP", "PRON", "CCONJ", "SPACE", "SCONJ"]]))]), str[1]["ANSWER"]]],columns=columns_list, dtype="object")
-    res_key_ans = pd.concat([res_key_ans, loc], ignore_index=True)
+first_dataframe = pd.DataFrame(columns=columns_list)
 
-res_key_ans.to_csv("res_key_ans.csv", sep=";", index=False)
+for line in second_database.iterrows():
+    question = " ".join([line[1]["Теги по услуге"], line[1]["Сокращенное наименование услуги"], line[1]["Вопрос"]])
+    nlp_question = nlp(question)
+    normalized_question = " ".join([token.lemma_ for token in nlp_question if token.pos_ not in ignore_list])
+    keywords_question = " ".join([i[0].lower() for i in extractor.extract_keywords(normalized_question)])
+    line_dataframe = pd.DataFrame([[keywords_question, line[1]["Ответ"]]], columns=columns_list, dtype="object")
+    first_dataframe = pd.concat([first_dataframe, line_dataframe], ignore_index=True)
 
-full_dataset = pd.concat([keywords_answer, res_key_ans], ignore_index=True)
-full_dataset.to_csv("full_dataset.csv", sep=";", index=False)
+first_dataframe.to_csv("keywords_answer.csv", sep=";", index=False)
+
+numOfKeywords_question = 3
+numOfKeywords_answer = 2
+
+extractor_question = yake.KeywordExtractor(lan=language,
+                                  n=max_ngram_size,
+                                  dedupLim=deduplication_thresold,
+                                  dedupFunc=deduplication_algo,
+                                  windowsSize=windowSize,
+                                  top=numOfKeywords_question)
+
+extractor_answer = yake.KeywordExtractor(lan=language,
+                                  n=max_ngram_size,
+                                  dedupLim=deduplication_thresold,
+                                  dedupFunc=deduplication_algo,
+                                  windowsSize=windowSize,
+                                  top=numOfKeywords_answer)
+
+columns_list = ['Keywords', 'Answer']
+second_dataframe = pd.DataFrame(columns=columns_list)
+
+for line in first_database.iterrows():
+    question = line[1]["QUESTION"]
+    answer = line[1]["ANSWER"]
+    nlp_question = nlp(question)
+    nlp_answer = nlp(answer)
+    normalized_question = " ".join([token.lemma_ for token in nlp_question if token.pos_ not in ignore_list])
+    normalized_answer = " ".join([token.lemma_ for token in nlp_answer if token.pos_ not in ignore_list])
+    keywords_question_list = [i[0].lower() for i in extractor_question.extract_keywords(normalized_question)]
+    keywords_answer_list = [i[0].lower() for i in extractor_answer.extract_keywords(normalized_answer)]
+    keywords = " ".join(set(keywords_question_list + keywords_answer_list))
+    line_dataframe = pd.DataFrame([[keywords, line[1]["ANSWER"]]], columns=columns_list, dtype="object")
+    second_dataframe = pd.concat([second_dataframe, line_dataframe], ignore_index=True)
+
+second_dataframe.to_csv("res_key_ans.csv", sep=";", index=False)
+
+full_keywords_answer_dataframe = pd.concat([first_dataframe, second_dataframe], ignore_index=True)
+full_keywords_answer_dataframe.to_csv("full_dataset.csv", sep=";", index=False)
