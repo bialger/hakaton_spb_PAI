@@ -1,7 +1,9 @@
 # PAI solution for case "MFC" - Hackathon SPb 2023
 
-Python console app that solves MFC problem using AI. Packed with Docker.
+Python console app that using AI models: Yake! and SpaCy, solves MFC problem - MFC employees can't search answers for clients requests in automatic mode. Packed with Docker.
 
+### Features
+   * Implemented flexible search settings. By running the database_edtior.py file with properly configured parameters: setting the number of keywords to search, how we search for the most "similar" set of keywords, we can adjust the relevancy of the issue
 ### Prerequisites
 
 #### Docker
