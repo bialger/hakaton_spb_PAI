@@ -27,7 +27,7 @@ extractor = yake.KeywordExtractor(lan=language,
 user_prompt = input()
 nlp_user_prompt = nlp(user_prompt)
 normalized_user_prompt = " ".join([token.lemma_ for token in nlp_user_prompt if token.pos_ not in ignore_list])
-extracted_keywords_list = [i[0].lower for i in extractor.extract_keywords(normalized_user_prompt)]
+extracted_keywords_list = [i[0].lower() for i in extractor.extract_keywords(normalized_user_prompt)]
 
 answers = find_answer.find_answers(extracted_keywords_list)
 if len(answers) == 1:
